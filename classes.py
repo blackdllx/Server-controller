@@ -9,6 +9,7 @@ class Request:
         def __init__(self, time=0):
             self.format="f"
             self.values=[time]
+            self.data=True
 
 
 class Response:

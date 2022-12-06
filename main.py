@@ -51,7 +51,7 @@ def send_v2(s, _class):
         return ''
     if _class.format:
         logging.info(f"SEND - Sending request data... {_class.format, 3.1}")
-        s.sendall(struct.pack(_class.format, *_class.values))
+        s.sendall(struct.pack(_class.format, 12.43))
 
         logging.info("SEND - Receiving data...")
         dt = RecvResponse(s, _class)

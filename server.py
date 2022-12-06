@@ -49,8 +49,18 @@ while True:
             match byts[key]:
 
                 case classes.Request.Test:
-                    logging.info("class test")
-                    logging.info("sending")
+                    if classes.Request.Test().data:
+                            logging.info("MAIN - Receiving data..")
+                            while True:
+                                    flag=False
+                                    read, write, error = select.select([conn], [conn], [], 0.5)
+                                    logging.info("MAIN - Waiting data..")
+                                    for i in read:
+                                        logging.info("MAIN - Reading data")
+                                        data = struct.unpack(classes.Request.Test().format, conn.recv(5000))
+                                        logging.info(f"MAIN - Data = {data}")
+                                        flag = True
+                                    if flag:break
                     rs = classes.Request.Test(time=time.time())
                     conn.send(struct.pack(rs.format, 85.4))
 
