@@ -6,9 +6,8 @@ class Request:
             self.values=[]
 
     class Test:
-        def __init__(self, time=None):
-            self.format=None
-            if time: self.format="l"
+        def __init__(self, time=0):
+            self.format="f"
             self.values=[time]
 
 

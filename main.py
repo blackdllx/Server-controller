@@ -10,7 +10,7 @@ logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s',datefmt='%
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 9999))
+s.connect(("localhost", 9998))
 s.setblocking(0)
 SOCKET_TIMEOUT=10
 
@@ -50,12 +50,14 @@ def send_v2(s, _class):
         logging.error("SEND - Receive status bad")
         return ''
     if _class.format:
-        logging.info("SEND - Sending request data...")
+        logging.info(f"SEND - Sending request data... {_class.format, 3.1}")
         s.sendall(struct.pack(_class.format, *_class.values))
 
         logging.info("SEND - Receiving data...")
-        if not RecvResponse(s, _class):
-            pass
+        dt = RecvResponse(s, _class)
+        logging.info(f"SEND - Data = {dt}")
+        if not dt:
+            return ""
 
 
 # send(classes.Request.HandShake())
