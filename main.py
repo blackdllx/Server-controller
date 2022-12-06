@@ -1,22 +1,21 @@
 import logging
 import pickle
 import select
-import struct
-import classes
 import socket
+import struct
 import time
 
-logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s',datefmt='%H:%M:%S', level=logging.DEBUG)
-
+logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect(("localhost", 9998))
 s.setblocking(0)
-SOCKET_TIMEOUT=10
+SOCKET_TIMEOUT = 10
 
-def RecvStatus(s:socket.socket):
+
+def RecvStatus(s: socket.socket):
     sTime = time.time()
-    while time.time()-sTime < SOCKET_TIMEOUT:
+    while time.time() - sTime < SOCKET_TIMEOUT:
         logging.info("RECEIVE(status) - Waiting for response...")
         read, write, error = select.select([s], [], [], 0.5)
         print(read, write, error)
@@ -27,6 +26,8 @@ def RecvStatus(s:socket.socket):
 
     logging.error("RECEIVE(status) - Connection timeout")
     return None
+
+
 def RecvResponse(s, _class):
     sTime = time.time()
     while time.time() - sTime < SOCKET_TIMEOUT:
@@ -36,6 +37,8 @@ def RecvResponse(s, _class):
             response = struct.unpack(_class.format, s.recv(5000))
             return response
     return None
+
+
 def send_v2(s, _class):
     with open("ClassBytes", "rb") as f:
         logging.info("SEND - Reading byte-keys...")
@@ -58,7 +61,3 @@ def send_v2(s, _class):
         logging.info(f"SEND - Data = {dt}")
         if not dt:
             return ""
-
-
-# send(classes.Request.HandShake())
-send_v2(s, classes.Request.Test())
