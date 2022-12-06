@@ -2,7 +2,14 @@
 class Request:
     class HandShake:
         def __init__(self):
-            pass
+            self.format=None
+            self.values=[]
+
+    class Test:
+        def __init__(self, time=None):
+            self.format=None
+            if time: self.format="l"
+            self.values=[time]
 
 
 class Response:

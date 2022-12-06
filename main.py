@@ -10,73 +10,32 @@ logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s',datefmt='%
 
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 9998))
+s.connect(("localhost", 9999))
 s.setblocking(0)
-SOCKET_TIMEOUT=5
-def send(_class):
-    with open("ClassBytes", "rb") as f:
-        byts: dict = pickle.load(f)
-        print(byts)
-    for i in byts:
-        if byts[i] == _class.__class__:
-            s.sendall(i)
-            break
-    sTime = time.time()
-    while True:
-        if time.time()-sTime < SOCKET_TIMEOUT:
-            data=None
-            try:data=s.recv(2048)
-            except:pass
-            print(data)
-            if not data:
-                continue
-        else:
-            print("socket timeout")
-            return ""
-    if data == b"OK":
-        print("data received")
-    if data == b"ERROR":
-        print("unexpected error")
-        return ''
-    print("server found requested class")
-    print(_class.format, *_class.values)
-    s.sendall(struct.pack(_class.format, *_class.values))
-    while True:
-        if time.time()-sTime < SOCKET_TIMEOUT:
-            data=s.recv(2048)
-            print(data)
-            if not data:
-                continue
-        else:
-            print("socket timeout")
-            return ""
-    if data == b"OK":
-        print("data received")
-    if data == b"ERROR":
-        print("unexpected error")
-        return ''
-    print("server received data success fully")
+SOCKET_TIMEOUT=10
 
 def RecvStatus(s:socket.socket):
     sTime = time.time()
-    while time.time()-sTime < 5:
-        flag = False
+    while time.time()-sTime < SOCKET_TIMEOUT:
         logging.info("RECEIVE(status) - Waiting for response...")
-        read, write, errors = select.select([s], [s], [], 0.5)
+        read, write, error = select.select([s], [], [], 0.5)
+        print(read, write, error)
         for i in read:
             status = s.recv(2048)
             logging.info(f"RECEIVE(status) - Response code = {status}")
-            flag=True
-        for i in write:
-            pass
-        for i in errors:
-            logging.warn("RECEIVE(status) - Error")
-    if not flag:
-        logging.error("RECEIVE(status) - Connection timeout")
-        return None
-    return status
-def RecvResponse(s):
-    pass
+            return status
+
+    logging.error("RECEIVE(status) - Connection timeout")
+    return None
+def RecvResponse(s, _class):
+    sTime = time.time()
+    while time.time() - sTime < SOCKET_TIMEOUT:
+        logging.info("RECEIVE(response) - Waiting for response...")
+        read, write, error = select.select([s], [], [], 0.5)
+        for i in read:
+            response = struct.unpack(_class.format, s.recv(5000))
+            return response
+    return None
 def send_v2(s, _class):
     with open("ClassBytes", "rb") as f:
         logging.info("SEND - Reading byte-keys...")
@@ -90,11 +49,14 @@ def send_v2(s, _class):
     if RecvStatus(s) != b"OK":
         logging.error("SEND - Receive status bad")
         return ''
-    # logging.info("SEND - Sending request data...")
-    # s.sendall(struct.pack(_class.format, *_class.values))
-    # if RecvStatus(s) != b"OK":
-    #     logging.error("SEND - Receive status bad")
-    #     return ''
+    if _class.format:
+        logging.info("SEND - Sending request data...")
+        s.sendall(struct.pack(_class.format, *_class.values))
+
+        logging.info("SEND - Receiving data...")
+        if not RecvResponse(s, _class):
+            pass
+
 
 # send(classes.Request.HandShake())
-send_v2(s, classes.Request.HandShake())
+send_v2(s, classes.Request.Test())

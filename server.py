@@ -1,13 +1,15 @@
 import socket
 import pickle
 import struct
+import time
+
 import classes
 import logging
 import select
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s',datefmt='%H:%M:%S', level=logging.DEBUG)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("localhost", 9998))
+s.bind(("localhost", 9999))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.setblocking(0)
 
@@ -33,7 +35,32 @@ while True:
             key = ReadRequesKey(conn)
             logging.info(f"MAIN - Requset class = {byts[key]}")
             logging.info("MAIN - Sending response status")
-            s.sendall(b"OK")
+            conn.send(b"OK")
+            if byts[key].format:
+                logging.info("MAIN - Receiving data..")
+                while True:
+                    read, write, error = select.select([conn], [conn], [], 0.5)
+                    logging.info("MAIN - Waiting data..")
+                    for i in read:
+                        logging.info("MAIN - Reading data")
+                        data = struct.unpack(byts[key].format, conn.recv(5000))
+                        logging.info(f"MAIN - Data = {data}")
+
+            match byts[key]:
+
+                case classes.Request.Test:
+                    while True:
+                        read, write, error = select.select([], [conn], [], 0.5)
+                        for i in write:
+                            rs = classes.Request.Test(time.time())
+                            conn.send(struct.pack(rs.format, *rs.values))
+
+                case _:
+                    pass
+
+
+
+
         # s.listen(2)
         # conn, addr = s.accept()
         # print(conn, addr)
