@@ -11,7 +11,7 @@ import classes
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("localhost", 9999))
+s.bind(("localhost", 9998))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.setblocking(0)
 
@@ -120,10 +120,7 @@ while True:
                                 flag = True
                             if flag: break
                         if servers:
-                            # logging.info(GetLogs(data[0]))
-                            af = classes.GetLog(0, GetLogs(data[0])).values
-                            logging.info(f"{len(af[1])} {af}")
-                            conn.send(netstruct.pack(classes.GetLog(0,'').format, *af))
+                            conn.send(GetLogs(data[0]).encode())
                         continue
 
 

@@ -11,7 +11,7 @@ import classes
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 9999))
+s.connect(("localhost", 9998))
 s.setblocking(0)
 SOCKET_TIMEOUT = 10
 
@@ -37,6 +37,9 @@ def RecvResponse(s, _class):
         logging.info("RECEIVE(response) - Waiting for response...")
         read, write, error = select.select([s], [], [], 0.5)
         for i in read:
+            if _class.__class__ == classes.GetLog:
+                response = s.recv(5000).decode()
+                return response
             response = struct.unpack(_class.format, s.recv(5000))
             return response
     return None
@@ -57,7 +60,7 @@ def send_v2(s, _class):
         return ''
     if _class.format:
         # logging.info(f"SEND - Sending request data... {netstruct.pack(_class.format, *_class.values)}")
-        if _class.format == b"b$i" or _class.format == b"i3349b$":
+        if _class.__class__ == classes.Command or _class.__class__ == classes.GetLog:
             s.sendall(netstruct.pack(b"ib$", *_class.values))
         else:
             s.sendall(struct.pack(_class.format, *_class.values))

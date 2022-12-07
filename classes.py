@@ -14,7 +14,7 @@ class StartServer:
 
 class GetLog:
     def __init__(self, id, log):
-        self.format = b"i3349b$"
+        self.format = b"ib$"
         self.values=[id, log]
         self.response = True
 class StopServer:
