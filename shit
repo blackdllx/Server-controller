@@ -1,0 +1,31 @@
+[21:54:42] [main/INFO]: [STDERR]: Caused by: java.lang.NullPointerException: Cannot invoke "org.spongepowered.asm.mixin.transformer.ClassInfo.hasSuperClass(org.spongepowered.asm.mixin.transformer.ClassInfo)" because the return value of "org.spongepowered.asm.mixin.transformer.ClassInfo.forType(org.objectweb.asm.Type, org.spongepowered.asm.mixin.transformer.ClassInfo$TypeLookup)" is null
+[21:54:42] [main/INFO]: [STDERR]: 	at org.spongepowered.asm.util.asm.MixinVerifier.isAssignableFrom(MixinVerifier.java:104)
+[21:54:42] [main/INFO]: [STDERR]: 	at org.objectweb.asm.tree.analysis.SimpleVerifier.isSubTypeOf(SimpleVerifier.java:212)
+[21:54:42] [main/INFO]: [STDERR]: 	at org.objectweb.asm.tree.analysis.BasicVerifier.naryOperation(BasicVerifier.java:400)
+[21:54:42] [main/INFO]: [STDERR]: 	at org.objectweb.asm.tree.analysis.BasicVerifier.naryOperation(BasicVerifier.java:44)
+[21:54:42] [main/INFO]: [STDERR]: 	at org.objectweb.asm.tree.analysis.Frame.executeInvokeInsn(Frame.java:682)
+[21:54:42] [main/INFO]: [STDERR]: 	at org.objectweb.asm.tree.analysis.Frame.execute(Frame.java:609)
+[21:54:42] [main/INFO]: [STDERR]: 	at org.objectweb.asm.tree.analysis.Analyzer.analyze(Analyzer.java:188)
+[21:54:42] [main/INFO]: [STDERR]: 	... 42 more
+[21:54:42] [main/INFO]: Krypton is now accelerating your Minecraft server's networking stack 🚀
+[21:54:42] [main/INFO]: Loading Open Parties and Claims!
+[21:54:42] [main/INFO]: Could not initialize bot. Could not load config or your Bot Token is missing. Bot will be disabled
+[21:54:42] [main/INFO]: Loading Xaero's Minimap - Stage 1/2 (Server)
+[21:54:42] [main/INFO]: Loading Xaero's World Map - Stage 1/2 (Server)
+[21:54:42] [main/INFO]: Loading [Harvest Scythes]
+[21:54:42] [main/INFO]: [Mythic Metals] detected. Loading supported items.
+[21:54:42] [main/INFO]: [DragonLoot] detected. Loading supported items.
+[21:54:42] [main/INFO]: [Gobber] detected. Loading supported items.
+[21:54:42] [main/INFO]: [Harvest Scythes] has successfully been loaded!
+[21:54:42] [main/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[21:54:42] [main/ERROR]: Failed to start the minecraft server
+net.minecraft.class_5125$class_5126: /root/DarkRPG 4.8.0 Server Pack/./world/session.lock: already locked (possibly by other Minecraft instance?)
+	at net.minecraft.class_5125$class_5126.method_26805(class_5125.java:98) ~[server-intermediary.jar:?]
+	at net.minecraft.class_5125.method_26803(class_5125.java:44) ~[server-intermediary.jar:?]
+	at net.minecraft.class_32$class_5143.<init>(class_32.java:333) ~[server-intermediary.jar:?]
+	at net.minecraft.class_32.method_27002(class_32.java:321) ~[server-intermediary.jar:?]
+	at net.minecraft.server.Main.main(Main.java:125) [server-intermediary.jar:?]
+	at net.fabricmc.loader.impl.game.minecraft.MinecraftGameProvider.launch(MinecraftGameProvider.java:461) [fabric-loader-0.14.10.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.Knot.launch(Knot.java:74) [fabric-loader-0.14.10.jar:?]
+	at net.fabricmc.loader.impl.launch.knot.KnotServer.main(KnotServer.java:23) [fabric-loader-0.14.10.jar:?]
+	at net.fabricmc.loader.impl.launch.server.FabricServerLauncher.main(FabricServerLauncher.java:69) [fabric-loader-0.14.10.jar:?]

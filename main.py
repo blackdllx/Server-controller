@@ -4,11 +4,14 @@ import select
 import socket
 import struct
 import time
+import netstruct
+
+import classes
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 9998))
+s.connect(("localhost", 9999))
 s.setblocking(0)
 SOCKET_TIMEOUT = 10
 
@@ -53,11 +56,18 @@ def send_v2(s, _class):
         logging.error("SEND - Receive status bad")
         return ''
     if _class.format:
-        logging.info(f"SEND - Sending request data... {_class.format, 3.1}")
-        s.sendall(struct.pack(_class.format, 12.43))
+        # logging.info(f"SEND - Sending request data... {netstruct.pack(_class.format, *_class.values)}")
+        if _class.format == b"b$i" or _class.format == b"i3349b$":
+            s.sendall(netstruct.pack(b"ib$", *_class.values))
+        else:
+            s.sendall(struct.pack(_class.format, *_class.values))
+        if _class.response:
+            logging.info("SEND - Receiving data...")
+            dt = RecvResponse(s, _class)
+            if not dt:
+                return ""
+            logging.info(f"SEND - Data = {dt}")
 
-        logging.info("SEND - Receiving data...")
-        dt = RecvResponse(s, _class)
-        logging.info(f"SEND - Data = {dt}")
-        if not dt:
-            return ""
+send_v2(s, classes.StartServer(0))
+time.sleep(5)
+send_v2(s, classes.GetLog(0, b'kl'))
