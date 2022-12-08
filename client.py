@@ -10,10 +10,17 @@ import classes
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("localhost", 9998))
-s.setblocking(0)
-SOCKET_TIMEOUT = 10
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# s.connect(("localhost", 9998))
+# s.setblocking(0)
+# SOCKET_TIMEOUT = 10
+
+def connectSocket(ip,port,password):
+    global s, SOCKET_TIMEOUT
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(("localhost", 9998))
+    s.setblocking(0)
+    SOCKET_TIMEOUT = 5
 
 
 def RecvStatus(s: socket.socket):
@@ -40,12 +47,12 @@ def RecvResponse(s, _class):
             if _class.__class__ == classes.GetLog:
                 response = s.recv(5000).decode()
                 return response
-            response = struct.unpack(_class.format, s.recv(5000))
+            response = netstruct.unpack(_class.format, s.recv(5000))
             return response
     return None
 
 
-def send_v2(s, _class):
+def send_v2(_class):
     with open("ClassBytes", "rb") as f:
         logging.info("SEND - Reading byte-keys...")
         byts: dict = pickle.load(f)
@@ -60,8 +67,8 @@ def send_v2(s, _class):
         return ''
     if _class.format:
         # logging.info(f"SEND - Sending request data... {netstruct.pack(_class.format, *_class.values)}")
-        if _class.__class__ == classes.Command or _class.__class__ == classes.GetLog:
-            s.sendall(netstruct.pack(b"ib$", *_class.values))
+        if _class.__class__ == classes.Command or _class.__class__ == classes.GetLog or _class.__class__ == classes.HandShake:
+            s.sendall(netstruct.pack(_class.format, *_class.values))
         else:
             s.sendall(struct.pack(_class.format, *_class.values))
         if _class.response:
@@ -70,7 +77,8 @@ def send_v2(s, _class):
             if not dt:
                 return ""
             logging.info(f"SEND - Data = {dt}")
+            return dt
 
-send_v2(s, classes.StartServer(0))
-time.sleep(5)
-send_v2(s, classes.GetLog(0, b'kl'))
+# send_v2(s, classes.StartServer(0))
+# time.sleep(5)
+# send_v2(s, classes.GetLog(0, b'kl'))
