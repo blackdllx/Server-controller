@@ -10,10 +10,15 @@ import classes
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
+PORTS = [25565, 25566, 25567]
+
 # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # s.connect(("localhost", 9998))
 # s.setblocking(0)
 # SOCKET_TIMEOUT = 10
+
+def getServers():
+    pass
 
 def connectSocket(ip,port,password):
     global s, SOCKET_TIMEOUT
