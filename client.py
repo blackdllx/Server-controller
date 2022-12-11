@@ -5,6 +5,7 @@ import socket
 import struct
 import time
 import netstruct
+import minestat
 
 import classes
 
@@ -12,13 +13,16 @@ logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='
 
 PORTS = [25565, 25566, 25567]
 
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect(("localhost", 9998))
-# s.setblocking(0)
-# SOCKET_TIMEOUT = 10
 
-def getServers():
-    pass
+def getServers(host):
+    servers = []
+    ips = ["pvp.thearchon.net", "play.extremecraft.net"]
+    ports = [25565, 25565]
+    for i in range(2):
+        serv = minestat.MineStat(ips[i], ports[i])
+        servers.append([i, serv])
+
+    return servers
 
 def connectSocket(ip,port,password):
     global s, SOCKET_TIMEOUT
@@ -83,7 +87,3 @@ def send_v2(_class):
                 return ""
             logging.info(f"SEND - Data = {dt}")
             return dt
-
-# send_v2(s, classes.StartServer(0))
-# time.sleep(5)
-# send_v2(s, classes.GetLog(0, b'kl'))

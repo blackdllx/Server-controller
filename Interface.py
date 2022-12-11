@@ -16,43 +16,92 @@ class App(tk.CTk):
         self.password=None
         self.host=None
         self.port=None
+        self.MainMenu()
+        # self.loadFrames()
+        # self.test()
+        # self.ConnectFrame.pack(pady=40)
 
-        self.loadFrames()
+    def test(self):
 
-        self.ConnectFrame.pack(pady=40)
+        def editPage(id):
+            page2 = tk.CTkFrame(frame, height=300, width=320)
+            page1 = tk.CTkFrame(frame, height=300, width=320)
+            label1Page1 = tk.CTkLabel(page1, text="lable1 1")
+            label2Page1 = tk.CTkLabel(page1, text="lable2 1")
+            label1Page2 = tk.CTkLabel(page2, text="lable1 2")
+            label2Page2 = tk.CTkLabel(page2, text="lable2 2")
+            label2Page1.pack()
+            label2Page2.pack()
+            label1Page1.pack()
+            label1Page2.pack()
+            pages = [page1, page2]
+            # map(tk.CTkFrame.destroy, pages)
+            # for i in pages:
+            #     i.destroy()
+            #     print("forget")
+            pages[id].grid(column=1, row=0, padx=10, pady=10)
+            for i in pages[:id:]:
+                i.destroy()
 
 
 
-        # self.ConnectRememberChekbox.place(y=300, x=100)
+
+        self.geometry("570x320")
+        self.title("Control panel")
+        frame = tk.CTkFrame(self, width=140, corner_radius=0)
+        frame.columnconfigure(3)
+        frame.pack()
+        sidebar = tk.CTkFrame(frame, height=300, width=150)
+        sidebar.grid(column=0, row=0, padx=10, pady=10)
+        pagestart = tk.CTkFrame(frame, height=300, width=320)
+        pagestart.grid(column=1, row=0, padx=10, pady=10)
+        # page2 = tk.CTkFrame(frame, height=300, width=320)
+        # page1 = tk.CTkFrame(frame, height=300, width=320)
+        # label1Page1 = tk.CTkLabel(page1, text="lable1 1")
+        # label2Page1= tk.CTkLabel(page1, text="lable2 1")
+        # label1Page2 = tk.CTkLabel(page2, text="lable1 2")
+        # label2Page2 = tk.CTkLabel(page2, text="lable2 2")
+        # label2Page1.pack()
+        # label2Page2.pack()
+        # label1Page1.pack()
+        # label1Page2.pack()
+        # pages = [page1, page2, pagestart]
+
+        btn1 = tk.CTkButton(sidebar, text="1", command=lambda: editPage(0))
+        btn2 = tk.CTkButton(sidebar, text="2", command=lambda: editPage(1))
+        btn1.pack()
+        btn2.pack()
+
+
 
     def loadFrames(self):
 
         self.ConnectFrame = tk.CTkFrame(self, width=400, height=500)
         self.ConnectIpInputState = tk.StringVar()
-        self.ConnectIpInput = tk.CTkEntry(self.ConnectFrame, textvariable=self.ConnectIpInputState, width=250,
+        ConnectIpInput = tk.CTkEntry(self.ConnectFrame, textvariable=self.ConnectIpInputState, width=250,
                                           height=40)
-        self.ConnectIpInputLabel = tk.CTkLabel(self.ConnectFrame, text="Server ip")
-        self.ConnectIpInputLabel.pack(pady=5)
-        self.ConnectIpInput.pack(pady=5)
+        ConnectIpInputLabel = tk.CTkLabel(self.ConnectFrame, text="Server ip")
+        ConnectIpInputLabel.pack(pady=5)
+        ConnectIpInput.pack(pady=5)
         self.ConnectPortInputState = tk.StringVar()
-        self.ConnectPortInput = tk.CTkEntry(self.ConnectFrame, width=250, height=40,
+        ConnectPortInput = tk.CTkEntry(self.ConnectFrame, width=250, height=40,
                                             textvariable=self.ConnectPortInputState)
-        self.ConnectPortInputLabel = tk.CTkLabel(self.ConnectFrame, text="Server port")
-        self.ConnectPortInputLabel.pack(pady=5)
-        self.ConnectPortInput.pack(pady=5)
+        ConnectPortInputLabel = tk.CTkLabel(self.ConnectFrame, text="Server port")
+        ConnectPortInputLabel.pack(pady=5)
+        ConnectPortInput.pack(pady=5)
         self.ConnectPasswordInputState = tk.StringVar()
-        self.ConnectPasswordInput = tk.CTkEntry(self.ConnectFrame, width=250, height=40,
+        ConnectPasswordInput = tk.CTkEntry(self.ConnectFrame, width=250, height=40,
                                                 textvariable=self.ConnectPasswordInputState)
-        self.ConnectPasswordInputLabel = tk.CTkLabel(self.ConnectFrame, text="Password")
-        self.ConnectPasswordInputLabel.pack(pady=5)
-        self.ConnectPasswordInput.pack(pady=5)
-        self.ConnectRememberChekbox = tk.CTkCheckBox(self.ConnectFrame, text="Remember", height=50, width=50)
-        self.ConnectRememberChekbox.pack(pady=20, anchor="w")
+        ConnectPasswordInputLabel = tk.CTkLabel(self.ConnectFrame, text="Password")
+        ConnectPasswordInputLabel.pack(pady=5)
+        ConnectPasswordInput.pack(pady=5)
+        ConnectRememberChekbox = tk.CTkCheckBox(self.ConnectFrame, text="Remember", height=50, width=50)
+        ConnectRememberChekbox.pack(pady=20, anchor="w")
         self.ConnectErrorsLabel = tk.CTkLabel(self.ConnectFrame, text="")
         self.ConnectErrorsLabel.pack()
-        self.ConnectConnectButton = tk.CTkButton(self.ConnectFrame, height=35, width=150, text="Connect",
+        ConnectConnectButton = tk.CTkButton(self.ConnectFrame, height=35, width=150, text="Connect",
                                                  command=self.Connect)
-        self.ConnectConnectButton.pack()
+        ConnectConnectButton.pack()
 
 
 
@@ -76,26 +125,67 @@ class App(tk.CTk):
             self.ConnectPasswordInputState.set("")
         if result == b"GOOD":
             self.password=password
+            self.serversCount = client.send_v2(classes.GetServers(0, password))
             self.ConnectFrame.forget()
             self.MainMenu()
 
+    def ShowInfo(self, id):
+        pass
     def MainMenu(self):
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure((2, 3), weight=0)
-        self.grid_rowconfigure((0, 1, 2), weight=1)
-        self.geometry("700x300")
+
+        self.geometry("570x320")
         self.title("Control panel")
-        self.MainFrame = tk.CTkFrame(self, width=140, corner_radius=0)
-        self.MainFrame.grid(row=0, column=0, rowspan=4, sticky="nsew")
-        self.MainFrame.grid_rowconfigure(4, weight=1)
-        MainServerListFrame = tk.CTkFrame(self.MainFrame, height=300)
-        MainServerListFrame.grid(row=0, column=0)
-        lable = tk.CTkButton(MainServerListFrame, text="safsdgf")
-        lable.place(y=10, x=10)
+        self.MainFrame = tk.CTkFrame(self, width=570, height=320, corner_radius=0)
+
+        self.MainFrame.pack()
+
+        MainServerListFrame = tk.CTkFrame(self.MainFrame, height=300, width=150)
+        MainServerListFrame.grid(row=0, column=0, padx=10)
+
+        btn1 = tk.CTkButton(MainServerListFrame, text="1", command=lambda: editPage(0))
+        btn1.pack()
+        btn2 = tk.CTkButton(MainServerListFrame, text="1", command=lambda: editPage(1))
+        btn2.pack()
+        self.servers = client.getServers(self.host)#[:self.serversCount]
+
+
+        def editPage(id):
+            for i in self.prewPage:
+                i.destroy()
+            pages = []
+            for i in self.servers:
+                if i[1].online:
+                    status = "Active"
+                else:
+                    status = "Offline"
+                page = tk.CTkFrame(self.MainFrame)
+                state = tk.CTkLabel(page, text=f"Server status: {status}")
+                state.pack(anchor="n", padx=10, pady=10)
+                players= tk.CTkLabel(page, text=f"Online players: {i[1].current_players}")
+                players.pack(padx=10, pady=10)
+                motd = tk.CTkLabel(page, text=f"Motd: {i[1].stripped_motd}")
+                motd.pack(padx=10, pady=10)
+                pages.append(page)
+            self.prewPage = pages
+
+            pages[id].grid(row=0, column=1, padx=10, pady=10)
+
+
+
+
+        # lable = tk.CTkButton(MainServerListFrame, text="safsdgf")
+        # lable.pack(pady=10, padx=10)
+        # lable1 = tk.CTkButton(MainServerListFrame, text="safsdgf1")
+        # lable1.pack(pady=10)
 
         MainServerInfoFrame = tk.CTkFrame(self.MainFrame, height=300, width=400)
-        MainServerInfoFrame.grid(row=0, column=1, padx=40, pady=10)
-        self.MainFrame.pack()
+        self.prewPage = [MainServerInfoFrame]
+        MainServerInfoFrame.grid(row=0, column=1, padx=10, pady=10)
+        # self.MainFrame.grid()
+    def update(self):
+        self.MainFrame.destroy()
+        self.MainMenu()
+
 
 
 if __name__ == "__main__":

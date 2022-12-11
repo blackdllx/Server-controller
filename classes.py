@@ -30,6 +30,10 @@ class Command:
         self.data = True
         self.response = False
 
+class GetServers:
+    def  __init__(self, servers, password):
+        self.fotmat = b"ib$"
+        self.values = [servers, password]
 
 class Test:
     def __init__(self, time=0):
