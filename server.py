@@ -14,7 +14,7 @@ PASSWORD="1234".encode()
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("localhost", 9998))
+s.bind(("localhost", 9999))
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 s.setblocking(0)
 
@@ -47,15 +47,14 @@ def GetLogs(id):
 servers = []
 
 while True:
-    try:
         s.listen()
         read, write, error = select.select([s], [s], [], 0.5)
         with open("ClassBytes", "rb") as f:
             byts: dict = pickle.load(f)
         for i in read:
-
+            conn, addr = s.accept()
             while True:
-                conn, addr = s.accept()
+
                 logging.info("MAIN - Connected")
                 key = ReadRequesKey(conn)
                 if key == b'':
@@ -71,7 +70,7 @@ while True:
                         # logging.info("MAIN - Running command..")
                         while True:
                             flag = False
-                            read, write, error = select.select([conn], [conn], [conn], 0.5)
+                            read, write, error = select.select([conn], [conn], [], 0.5)
                             logging.info("MAIN - Waiting data..")
                             for i in read:
                                 logging.info("MAIN - Reading data")
@@ -82,6 +81,22 @@ while True:
                         if data[-1] == PASSWORD:
                             conn.send(netstruct.pack(classes.HandShake(b'').format, *classes.HandShake(b'GOOD').values))
                         conn.send(netstruct.pack(classes.HandShake(b'').format, *classes.HandShake(b'BAD').values))
+
+                    case classes.GetServers:
+                        logging.info("MAIN - Sending server list..")
+                        while True:
+                            flag = False
+                            read, write, error = select.select([conn], [conn], [conn], 0.5)
+                            logging.info("MAIN - Waiting data..")
+                            for i in read:
+                                logging.info("MAIN - Reading data")
+                                data = netstruct.unpack(classes.GetServers('', 0).format, conn.recv(5000))
+                                logging.info(f"MAIN - Data = {data}")
+                                flag = True
+                            if flag: break
+                        if data[-1] == PASSWORD:
+                            conn.sendall(netstruct.pack(classes.GetServers.fortmat, *classes.GetServers(len(servers), b'')))
+
 
                     case classes.Command:
                         logging.info("MAIN - Running command..")
@@ -134,11 +149,3 @@ while True:
                             if servers:
                                 conn.send(GetLogs(data[0]).encode())
                         continue
-
-
-
-    except Exception as error:
-        print(error)
-        if error == KeyboardInterrupt:
-            s.close()
-            break

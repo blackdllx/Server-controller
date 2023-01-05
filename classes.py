@@ -32,7 +32,7 @@ class Command:
 
 class GetServers:
     def  __init__(self, servers, password):
-        self.fotmat = b"ib$"
+        self.format = b"ib$"
         self.values = [servers, password]
 
 class Test:

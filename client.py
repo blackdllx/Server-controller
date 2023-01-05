@@ -19,15 +19,15 @@ def getServers(host):
     ips = ["pvp.thearchon.net", "play.extremecraft.net"]
     ports = [25565, 25565]
     for i in range(2):
-        serv = minestat.MineStat(ips[i], ports[i])
+        serv = minestat.MineStat(ips[i], ports[i], query_protocol=minestat.SlpProtocols.JSON)
         servers.append([i, serv])
 
     return servers
 
-def connectSocket(ip,port,password):
+def connectSocket(ip,port: int):
     global s, SOCKET_TIMEOUT
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(("localhost", 9998))
+    s.connect(("localhost", 9999))
     s.setblocking(0)
     SOCKET_TIMEOUT = 5
 
@@ -69,6 +69,7 @@ def send_v2(_class):
     for i in byts:
         if byts[i] == _class.__class__:
             logging.info("SEND - Sending request key...")
+            logging.info(f"SEND - class = {_class.__class__}")
             s.sendall(i)
             break
     if RecvStatus(s) != b"OK":

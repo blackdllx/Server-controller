@@ -1,3 +1,4 @@
+import threading
 import time
 
 import customtkinter as tk
@@ -16,82 +17,31 @@ class App(tk.CTk):
         self.password=None
         self.host=None
         self.port=None
-        self.MainMenu()
+        self.Connect()
+        # self.MainMenu()
         # self.loadFrames()
         # self.test()
         # self.ConnectFrame.pack(pady=40)
 
-    def test(self):
 
-        def editPage(id):
-            page2 = tk.CTkFrame(frame, height=300, width=320)
-            page1 = tk.CTkFrame(frame, height=300, width=320)
-            label1Page1 = tk.CTkLabel(page1, text="lable1 1")
-            label2Page1 = tk.CTkLabel(page1, text="lable2 1")
-            label1Page2 = tk.CTkLabel(page2, text="lable1 2")
-            label2Page2 = tk.CTkLabel(page2, text="lable2 2")
-            label2Page1.pack()
-            label2Page2.pack()
-            label1Page1.pack()
-            label1Page2.pack()
-            pages = [page1, page2]
-            # map(tk.CTkFrame.destroy, pages)
-            # for i in pages:
-            #     i.destroy()
-            #     print("forget")
-            pages[id].grid(column=1, row=0, padx=10, pady=10)
-            for i in pages[:id:]:
-                i.destroy()
-
-
-
-
-        self.geometry("570x320")
-        self.title("Control panel")
-        frame = tk.CTkFrame(self, width=140, corner_radius=0)
-        frame.columnconfigure(3)
-        frame.pack()
-        sidebar = tk.CTkFrame(frame, height=300, width=150)
-        sidebar.grid(column=0, row=0, padx=10, pady=10)
-        pagestart = tk.CTkFrame(frame, height=300, width=320)
-        pagestart.grid(column=1, row=0, padx=10, pady=10)
-        # page2 = tk.CTkFrame(frame, height=300, width=320)
-        # page1 = tk.CTkFrame(frame, height=300, width=320)
-        # label1Page1 = tk.CTkLabel(page1, text="lable1 1")
-        # label2Page1= tk.CTkLabel(page1, text="lable2 1")
-        # label1Page2 = tk.CTkLabel(page2, text="lable1 2")
-        # label2Page2 = tk.CTkLabel(page2, text="lable2 2")
-        # label2Page1.pack()
-        # label2Page2.pack()
-        # label1Page1.pack()
-        # label1Page2.pack()
-        # pages = [page1, page2, pagestart]
-
-        btn1 = tk.CTkButton(sidebar, text="1", command=lambda: editPage(0))
-        btn2 = tk.CTkButton(sidebar, text="2", command=lambda: editPage(1))
-        btn1.pack()
-        btn2.pack()
-
-
-
-    def loadFrames(self):
-
+    def Connect(self):
         self.ConnectFrame = tk.CTkFrame(self, width=400, height=500)
+        self.ConnectFrame.pack(pady=40)
         self.ConnectIpInputState = tk.StringVar()
         ConnectIpInput = tk.CTkEntry(self.ConnectFrame, textvariable=self.ConnectIpInputState, width=250,
-                                          height=40)
+                                     height=40)
         ConnectIpInputLabel = tk.CTkLabel(self.ConnectFrame, text="Server ip")
         ConnectIpInputLabel.pack(pady=5)
         ConnectIpInput.pack(pady=5)
         self.ConnectPortInputState = tk.StringVar()
         ConnectPortInput = tk.CTkEntry(self.ConnectFrame, width=250, height=40,
-                                            textvariable=self.ConnectPortInputState)
+                                       textvariable=self.ConnectPortInputState)
         ConnectPortInputLabel = tk.CTkLabel(self.ConnectFrame, text="Server port")
         ConnectPortInputLabel.pack(pady=5)
         ConnectPortInput.pack(pady=5)
         self.ConnectPasswordInputState = tk.StringVar()
         ConnectPasswordInput = tk.CTkEntry(self.ConnectFrame, width=250, height=40,
-                                                textvariable=self.ConnectPasswordInputState)
+                                           textvariable=self.ConnectPasswordInputState)
         ConnectPasswordInputLabel = tk.CTkLabel(self.ConnectFrame, text="Password")
         ConnectPasswordInputLabel.pack(pady=5)
         ConnectPasswordInput.pack(pady=5)
@@ -100,31 +50,28 @@ class App(tk.CTk):
         self.ConnectErrorsLabel = tk.CTkLabel(self.ConnectFrame, text="")
         self.ConnectErrorsLabel.pack()
         ConnectConnectButton = tk.CTkButton(self.ConnectFrame, height=35, width=150, text="Connect",
-                                                 command=self.Connect)
+                                            command=self.ConnectResponce)
         ConnectConnectButton.pack()
 
-
-
-    def Connect(self):
-        # print(self.ConnectPasswordInputState.get())
-        # self.ConnectErrorsLabel.configure(text="has")
+    def ConnectResponce(self):
         password = self.ConnectPasswordInputState.get()
         ip = self.ConnectIpInputState.get()
         port = self.ConnectPortInputState.get()
         try:
-            client.connectSocket(ip, port, password)
+            client.connectSocket(ip, port)
         except:
             self.ConnectErrorsLabel.configure(text="Uncorect ip or port. Chek if server controller is running")
             self.ConnectIpInputState.set("")
             self.ConnectPortInputState.set("")
-        # time.sleep(1)
         result = client.send_v2(classes.HandShake(password.encode()))[0]
         print(result)
+        time.sleep(1)
         if result == b"BAD":
             self.ConnectErrorsLabel.configure(text="Uncorrect password")
             self.ConnectPasswordInputState.set("")
         if result == b"GOOD":
             self.password=password
+
             self.serversCount = client.send_v2(classes.GetServers(0, password))
             self.ConnectFrame.forget()
             self.MainMenu()
@@ -141,15 +88,21 @@ class App(tk.CTk):
 
         MainServerListFrame = tk.CTkFrame(self.MainFrame, height=300, width=150)
         MainServerListFrame.grid(row=0, column=0, padx=10)
-
+        reload = tk.CTkButton(MainServerListFrame, text="reload", command=lambda: threading.Thread(target=asyncReload).start())
+        reload.pack(pady=10, padx=10)
         btn1 = tk.CTkButton(MainServerListFrame, text="1", command=lambda: editPage(0))
-        btn1.pack()
-        btn2 = tk.CTkButton(MainServerListFrame, text="1", command=lambda: editPage(1))
-        btn2.pack()
+        btn1.pack(pady=10, padx=10)
+        btn2 = tk.CTkButton(MainServerListFrame, text="2", command=lambda: editPage(1))
+        btn2.pack(pady=10, padx=10)
         self.servers = client.getServers(self.host)#[:self.serversCount]
-
+        self.corid=0
+        def asyncReload():
+            self.servers = client.getServers(self.host)
+            editPage(self.corid)
 
         def editPage(id):
+            self.curid=id
+            print(self.curid)
             for i in self.prewPage:
                 i.destroy()
             pages = []
@@ -161,6 +114,10 @@ class App(tk.CTk):
                 page = tk.CTkFrame(self.MainFrame)
                 state = tk.CTkLabel(page, text=f"Server status: {status}")
                 state.pack(anchor="n", padx=10, pady=10)
+                if i[1].online:
+                    btn = tk.CTkButton(page, text="Start", command= lambda: print("hui"))
+                else: btn = tk.CTkButton(page, text="Stop", command= lambda: print("dwa huja"))
+                btn.pack()
                 players= tk.CTkLabel(page, text=f"Online players: {i[1].current_players}")
                 players.pack(padx=10, pady=10)
                 motd = tk.CTkLabel(page, text=f"Motd: {i[1].stripped_motd}")
