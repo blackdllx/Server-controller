@@ -1,67 +1,74 @@
-import socket
-import logging
-import classes
-import pickle
 import json
+import logging
 import os
+import pickle
+import socket
 import subprocess
 import threading
-import time
 
+import classes
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
-
-with open("config.json", "rb")as f:
+with open("config.json", "rb") as f:
     CFG = json.load(f)
-Servers=[]
+Servers = []
+
 
 class Server:
-    active=False
+    active = False
+
     def __init__(self, id):
         self.console = None
         self.id = id
         self.dir = f"Servers/{id}/"
         self.basePath = os.getcwd()
         self.pa = ""
-        self.consoleLog=[]
-        self.properties={}
+        self.consoleLog = []
+        self.properties = {}
 
     def loadProperties(self):
         if not self.pa == os.getcwd():
             os.chdir(self.dir)
-            self.pa=os.getcwd()
+            self.pa = os.getcwd()
 
         with open("./server.properties", "rb") as f:
             data = f.read().decode()
             for i in data.split("\n"):
-                if i !="" and not i[0]=="#":
+                if i != "" and not i[0] == "#":
                     self.properties.update({i.split('=')[0]: i.split("=")[1]})
 
+    def saveProperties(self):
+        if not self.pa == os.getcwd():
+            os.chdir(self.dir)
+            self.pa = os.getcwd()
+        if self.properties != {}:
+            out = ''
+            for i in self.properties:
+                out = out + f"{i}={self.properties[i]}\n"
+            print(out)
+            with open("./server.properties", "wb") as f:
+                f.write(out.encode())
 
-    def sss(self):
-        print(self.consoleLog)
     def start(self):
         if not self.pa == os.getcwd():
             os.chdir(self.dir)
-            self.pa=os.getcwd()
+            self.pa = os.getcwd()
         if not self.active:
             self.console = subprocess.Popen(f". ./start.sh", shell=True, stdout=subprocess.PIPE,
                                             stdin=subprocess.PIPE)
-            self.active=True
+            self.active = True
             threading.Thread(target=self.parse).start()
-
-
 
     def stop(self):
         if self.active:
             self.console.stdin.write(b"stop")
-            self.active=False
+            self.active = False
 
     def parse(self):
         while self.active:
             if not self.console.poll():
-                f=self.console.stdout.readline()
+                f = self.console.stdout.readline()
                 if f != b"":
                     print(f.decode())
                     self.consoleLog.append(f)
@@ -72,19 +79,19 @@ class Server:
             self.console.stdin.flush()
 
 
-# out = cmd.communicate()[0].decode() sr=Server(0);sr.start() sr.sss() sr.console.stdout.write(b"help\n")
 def HandShake(request):
-        logging.log(logging.DEBUG, "HandShake response")
-        logging.log(logging.DEBUG, f"Config password: {CFG['password']}, request password: {request.password}")
-        try:
-            if request.password == CFG["password"]:
-                logging.info("Currect password")
-                return classes.HandShake.Response(status=classes.StatusCodes.GOOD)
-            logging.info("Uncurrect password")
-            return classes.HandShake.Response(status=classes.StatusCodes.UNCORECT_PASWORD)
-        except:
-            logging.info("Error")
-            return classes.HandShake.Response(status=classes.StatusCodes.BAD)
+    logging.log(logging.DEBUG, "HandShake response")
+    logging.log(logging.DEBUG, f"Config password: {CFG['password']}, request password: {request.password}")
+    try:
+        if request.password == CFG["password"]:
+            logging.info("Currect password")
+            return classes.HandShake.Response(status=classes.StatusCodes.GOOD)
+        logging.info("Uncurrect password")
+        return classes.HandShake.Response(status=classes.StatusCodes.UNCORECT_PASWORD)
+    except:
+        logging.info("Error")
+        return classes.HandShake.Response(status=classes.StatusCodes.BAD)
+
 
 def OpenServer():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -95,6 +102,7 @@ def OpenServer():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return s
 
+
 def ConnectionHandler(s: socket.socket):
     s.listen()
     while True:
@@ -102,13 +110,14 @@ def ConnectionHandler(s: socket.socket):
         logging.log(logging.DEBUG, "Connection added")
         while True:
             request = pickle.loads(conn.recv(5048))
-            logging.log(logging.DEBUG,"New request")
+            logging.log(logging.DEBUG, "New request")
             RequestHandler(conn, request)
+
 
 def RequestHandler(s: socket.socket, request):
     match request.__class__:
         case classes.HandShake.Request:
-            logging.log(logging.DEBUG,"HandShake request")
+            logging.log(logging.DEBUG, "HandShake request")
             s.sendall(pickle.dumps(HandShake(request)))
         case classes.ServersInfo.Request:
             pass
@@ -118,6 +127,7 @@ def RequestHandler(s: socket.socket, request):
             pass
         case classes.GetLog.Request:
             pass
+
 
 def ServerInit():
     if os.path.isdir("Servers"):
@@ -133,18 +143,12 @@ def ServerInit():
         ServerInit()
     ServerLoad()
 
+
 def ServerLoad():
     for i in range(CFG["ServerCount"]):
         Servers.append(Server(i))
 
+
 if __name__ == '__main__':
     ServerInit()
-    # OpenServer()
-    Servers[0].loadProperties()
-    print(Servers[0].properties)
-    # sr = Server(0)
-    # sr.start()
-    # time.sleep(15)
-    # print("Sending!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    # sr.send("help")
-
+    OpenServer()
