@@ -23,8 +23,9 @@ class ServersInfo:
 
 class GetLog:
     class Request:
-        def __init__(self, password):
+        def __init__(self, password, id):
             self.password = password
+            self.id=id
     class Response:
         def __init__(self, status, log):
             self.status=status
@@ -32,17 +33,22 @@ class GetLog:
 
 class ServerController:
     class Request:
-        def __init__(self, password):
+        def __init__(self, password, id, action):
             self.password = password
+            self.id=id
+            self.action=action
 
     class Response:
-        def __init__(self, status, servers):
+        def __init__(self, status):
             self.status=status
+
 
 class ServerCommand:
     class Request:
-        def __init__(self, password):
+        def __init__(self, password, id, command):
             self.password = password
+            self.id=id
+            self.command=command
 
     class Response:
         def __init__(self, status):

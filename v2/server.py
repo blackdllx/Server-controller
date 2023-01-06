@@ -64,7 +64,8 @@ class Server:
 
     def stop(self):
         if self.active:
-            self.console.stdin.write(b"stop")
+            self.console.stdin.write(b"stop\n")
+            self.console.stdin.flush()
             self.active = False
 
     def parse(self):
@@ -72,7 +73,7 @@ class Server:
             if not self.console.poll():
                 f = self.console.stdout.readline()
                 if f != b"":
-                    print(f.decode())
+                    print(f.decode(), end="")
                     self.consoleLog.append(f)
 
     def send(self, command: str):
@@ -81,7 +82,7 @@ class Server:
             self.console.stdin.flush()
 
     def exportInfo(self):
-        return {"id": self.id, "settings": self.properties, "lastLog":self.consoleLog[-20:]}
+        return {"id": self.id, "settings": self.properties}
 
 def HandShake(request):
     logging.log(logging.DEBUG, "HandShake response")
@@ -114,7 +115,9 @@ def ConnectionHandler():
         conn, addr = S.accept()
         logging.log(logging.DEBUG, "Connection added")
         while True:
-            request = pickle.loads(conn.recv(5048))
+            try:
+                request = pickle.loads(conn.recv(5048))
+            except:break
             logging.log(logging.DEBUG, "New request")
             RequestHandler(conn, request)
 
@@ -144,7 +147,7 @@ def RequestHandler(s: socket.socket, request):
 
 
         case classes.ServersInfo.Request:
-            # try:
+            try:
                 logging.log(logging.DEBUG, "ServerInfo request")
                 if auth(request.password):
                     logging.log(logging.DEBUG, "auth success")
@@ -155,15 +158,35 @@ def RequestHandler(s: socket.socket, request):
                     s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.GOOD, h)))
                     del h
                 else:s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.UNCORECT_PASWORD)))
-            # except Exception as er:
-            #     logging.error(er)
-            #     s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.BAD)))
+            except Exception as er:
+                logging.error(er)
+                s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.BAD)))
         case classes.ServerController.Request:
-            pass
+            try:
+                logging.log(logging.DEBUG, "ServerController request")
+                if auth(request.password):
+                    Servers[request.id].actions[request.action]()
+                    s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.GOOD)))
+                else:
+                    s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.UNCORECT_PASWORD)))
+            except:s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.BAD)))
         case classes.ServerCommand.Request:
-            pass
+            try:
+                logging.log(logging.DEBUG, "ServerCommand request")
+                if auth(request.password):
+                    Servers[request.id].send(request.command)
+                    s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.GOOD)))
+                else: s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.UNCORECT_PASWORD)))
+            except:
+                    s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.BAD)))
         case classes.GetLog.Request:
-            pass
+            try:
+                logging.log(logging.DEBUG, "GetLog request")
+                if auth(request.password):
+                    s.sendall(pickle.dumps(classes.GetLog.Response(classes.StatusCodes.GOOD, Servers[request.id].consoleLog[-20:])))
+                else: s.sendall(pickle.dumps(classes.GetLog.Response(classes.StatusCodes.UNCORECT_PASWORD)))
+            except:
+                s.sendall(pickle.dumps(classes.GetLog.Response(classes.StatusCodes.BAD)))
 
 
 def ServerInit():
@@ -184,5 +207,4 @@ def ServerInit():
 
 if __name__ == '__main__':
     ServerInit()
-    Servers[0].start()
     OpenServer()
