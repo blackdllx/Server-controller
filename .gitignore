@@ -1,3 +1,11 @@
-test
+libraries
+logs
 venv
-__pychche__
+versions
+bytes generator.py
+ClassBytes
+classes.py
+client.py
+Interface.py
+server.py
+skript.sh
