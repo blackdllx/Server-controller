@@ -5,6 +5,9 @@ import pickle
 import json
 import os
 import subprocess
+import threading
+import time
+
 
 logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='%H:%M:%S', level=logging.DEBUG)
 
@@ -21,9 +24,11 @@ class Server:
         self.dir = f"Servers/{id}/"
         self.basePath = os.getcwd()
         self.pa = ""
+        self.consoleLog=[]
 
-
-    def activate(self):
+    def sss(self):
+        print(self.consoleLog)
+    def start(self):
         if not self.pa == os.getcwd():
             os.chdir(self.dir)
             self.pa=os.getcwd()
@@ -31,19 +36,28 @@ class Server:
             self.console = subprocess.Popen(f". ./start.sh", shell=True, stdout=subprocess.PIPE,
                                             stdin=subprocess.PIPE)
             self.active=True
+            threading.Thread(target=self.parse).start()
 
     def stop(self):
         if self.active:
             self.console.stdin.write(b"stop")
+            self.active=False
 
-    def parseConsole(self):
+    def parse(self):
+        while self.active:
+            if not self.console.poll():
+                f=self.console.stdout.readline()
+                if f != b"":
+                    print(f.decode())
+                    self.consoleLog.append(f)
+
+    def send(self, command: str):
         if self.active:
-            for line in iter(self.console.stdout.readline, b''):
-                print(line.decode())
-            self.console.stdout.close()
+            self.console.stdin.write((command).encode() + b"\n")
+            self.console.stdin.flush()
 
-        else:return False
-# out = cmd.communicate()[0].decode()
+
+# out = cmd.communicate()[0].decode() sr=Server(0);sr.start() sr.sss() sr.console.stdout.write(b"help\n")
 def HandShake(request):
         logging.log(logging.DEBUG, "HandShake response")
         logging.log(logging.DEBUG, f"Config password: {CFG['password']}, request password: {request.password}")
@@ -104,9 +118,9 @@ def ServerInit():
 
 if __name__ == '__main__':
     ServerInit()
-    while True:
-        try:exec(input())
-        except Exception as error:logging.error(error)
-    # s=OpenServer()
-    # ConnectionHandler(s)
+    sr = Server(0)
+    sr.start()
+    time.sleep(15)
+    print("Sending!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    sr.send("help")
 
