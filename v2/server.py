@@ -13,12 +13,13 @@ logging.basicConfig(format='%(levelname)s - %(asctime)s: %(message)s', datefmt='
 with open("config.json", "rb") as f:
     CFG = json.load(f)
 Servers = []
-
+S=None
 
 class Server:
     active = False
 
     def __init__(self, id):
+        self.actions={"start": self.start, "stop": self.stop}
         self.console = None
         self.id = id
         self.dir = f"Servers/{id}/"
@@ -26,6 +27,7 @@ class Server:
         self.pa = ""
         self.consoleLog = []
         self.properties = {}
+        self.loadProperties()
 
     def loadProperties(self):
         if not self.pa == os.getcwd():
@@ -78,6 +80,8 @@ class Server:
             self.console.stdin.write((command).encode() + b"\n")
             self.console.stdin.flush()
 
+    def exportInfo(self):
+        return {"id": self.id, "settings": self.properties, "lastLog":self.consoleLog[-20:]}
 
 def HandShake(request):
     logging.log(logging.DEBUG, "HandShake response")
@@ -94,33 +98,66 @@ def HandShake(request):
 
 
 def OpenServer():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    global S
+    S = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        s.bind(("localhost", 9999))
+        S.bind(("localhost", 9999))
     except:
-        s.bind(("localhost", 9998))
-    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    return s
+        S.bind(("localhost", 9998))
+    S.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    ConnectionHandler()
 
 
-def ConnectionHandler(s: socket.socket):
-    s.listen()
+def ConnectionHandler():
+    S.listen()
     while True:
-        conn, addr = s.accept()
+        conn, addr = S.accept()
         logging.log(logging.DEBUG, "Connection added")
         while True:
             request = pickle.loads(conn.recv(5048))
             logging.log(logging.DEBUG, "New request")
             RequestHandler(conn, request)
 
-
+def auth(password):
+    if password == CFG["password"]:
+        logging.info("Currect password")
+        return True
+    else:
+        logging.info("Uncurrect password")
+        return False
 def RequestHandler(s: socket.socket, request):
     match request.__class__:
         case classes.HandShake.Request:
             logging.log(logging.DEBUG, "HandShake request")
-            s.sendall(pickle.dumps(HandShake(request)))
+            logging.log(logging.DEBUG, f"Config password: {CFG['password']}, request password: {request.password}")
+            try:
+                if request.password == CFG["password"]:
+                    logging.info("Currect password")
+                    s.sendall(pickle.dumps(classes.HandShake.Response(status=classes.StatusCodes.GOOD)))
+                else:
+                    logging.info("Uncurrect password")
+                    s.sendall(pickle.dumps( classes.HandShake.Response(status=classes.StatusCodes.UNCORECT_PASWORD)))
+            except:
+                logging.info("Error")
+                s.sendall(pickle.dumps( classes.HandShake.Response(status=classes.StatusCodes.BAD)))
+
+
+
         case classes.ServersInfo.Request:
-            pass
+            # try:
+                logging.log(logging.DEBUG, "ServerInfo request")
+                if auth(request.password):
+                    logging.log(logging.DEBUG, "auth success")
+                    h = []
+                    for i in Servers:
+                        h.append(i.exportInfo())
+                    logging.log(logging.DEBUG, "Sending")
+                    s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.GOOD, h)))
+                    del h
+                else:s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.UNCORECT_PASWORD)))
+            # except Exception as er:
+            #     logging.error(er)
+            #     s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.BAD)))
         case classes.ServerController.Request:
             pass
         case classes.ServerCommand.Request:
@@ -141,14 +178,11 @@ def ServerInit():
     else:
         os.mkdir("Servers")
         ServerInit()
-    ServerLoad()
-
-
-def ServerLoad():
     for i in range(CFG["ServerCount"]):
         Servers.append(Server(i))
 
 
 if __name__ == '__main__':
     ServerInit()
+    Servers[0].start()
     OpenServer()

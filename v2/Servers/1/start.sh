@@ -1,1 +1,0 @@
-java -Xmx1024M -Xms1024M -jar Servers/1/server.jar nogui

@@ -21,6 +21,10 @@ def HandShake(password):
     response = pickle.loads(S.recv(5048))
     return response.status
 
+def send(protocol):
+    S.sendall(pickle.dumps(protocol))
+    return pickle.loads(S.recv(8000))
+
 def Status2Text(status):
     match status:
         case classes.StatusCodes.GOOD: return "Good response"
@@ -30,6 +34,7 @@ def Status2Text(status):
 
 if __name__ == '__main__':
     ConnectSocket()
-    print(Status2Text(HandShake("1234")))
+    print(send(classes.ServersInfo.Request("1234")).__dict__)
+
 
 
