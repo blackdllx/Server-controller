@@ -25,6 +25,19 @@ class Server:
         self.basePath = os.getcwd()
         self.pa = ""
         self.consoleLog=[]
+        self.properties={}
+
+    def loadProperties(self):
+        if not self.pa == os.getcwd():
+            os.chdir(self.dir)
+            self.pa=os.getcwd()
+
+        with open("./server.properties", "rb") as f:
+            data = f.read().decode()
+            for i in data.split("\n"):
+                if i !="" and not i[0]=="#":
+                    self.properties.update({i.split('=')[0]: i.split("=")[1]})
+
 
     def sss(self):
         print(self.consoleLog)
@@ -37,6 +50,8 @@ class Server:
                                             stdin=subprocess.PIPE)
             self.active=True
             threading.Thread(target=self.parse).start()
+
+
 
     def stop(self):
         if self.active:
@@ -79,6 +94,7 @@ def OpenServer():
         s.bind(("localhost", 9998))
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     return s
+
 def ConnectionHandler(s: socket.socket):
     s.listen()
     while True:
@@ -114,13 +130,21 @@ def ServerInit():
                     f.write(f"java -Xmx1024M -Xms1024M -jar Servers/{i}/server.jar nogui")
     else:
         os.mkdir("Servers")
+        ServerInit()
+    ServerLoad()
 
+def ServerLoad():
+    for i in range(CFG["ServerCount"]):
+        Servers.append(Server(i))
 
 if __name__ == '__main__':
     ServerInit()
-    sr = Server(0)
-    sr.start()
-    time.sleep(15)
-    print("Sending!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    sr.send("help")
+    # OpenServer()
+    Servers[0].loadProperties()
+    print(Servers[0].properties)
+    # sr = Server(0)
+    # sr.start()
+    # time.sleep(15)
+    # print("Sending!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    # sr.send("help")
 
