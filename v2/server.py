@@ -14,6 +14,7 @@ with open("config.json", "rb") as f:
     CFG = json.load(f)
 Servers = []
 S=None
+BASEPATH = os.getcwd()
 
 class Server:
     active = False
@@ -22,8 +23,7 @@ class Server:
         self.actions={"start": self.start, "stop": self.stop}
         self.console = None
         self.id = id
-        self.dir = f"Servers/{id}/"
-        self.basePath = os.getcwd()
+        self.dir = f"/Servers/{id}/"
         self.pa = ""
         self.consoleLog = []
         self.properties = {}
@@ -31,7 +31,7 @@ class Server:
 
     def loadProperties(self):
         if not self.pa == os.getcwd():
-            os.chdir(self.dir)
+            os.chdir(BASEPATH+self.dir)
             self.pa = os.getcwd()
 
         with open("./server.properties", "rb") as f:
@@ -42,7 +42,7 @@ class Server:
 
     def saveProperties(self):
         if not self.pa == os.getcwd():
-            os.chdir(self.dir)
+            os.chdir(BASEPATH+self.dir)
             self.pa = os.getcwd()
         if self.properties != {}:
             out = ''
@@ -53,14 +53,16 @@ class Server:
                 f.write(out.encode())
 
     def start(self):
+        print("starting")
         if not self.pa == os.getcwd():
-            os.chdir(self.dir)
+            os.chdir(BASEPATH+self.dir)
             self.pa = os.getcwd()
         if not self.active:
             self.console = subprocess.Popen(f". ./start.sh", shell=True, stdout=subprocess.PIPE,
                                             stdin=subprocess.PIPE)
             self.active = True
             threading.Thread(target=self.parse).start()
+            print("started")
 
     def stop(self):
         if self.active:
@@ -162,23 +164,24 @@ def RequestHandler(s: socket.socket, request):
                 logging.error(er)
                 s.sendall(pickle.dumps(classes.ServersInfo.Response(classes.StatusCodes.BAD)))
         case classes.ServerController.Request:
-            try:
+            # try:
                 logging.log(logging.DEBUG, "ServerController request")
                 if auth(request.password):
-                    Servers[request.id].actions[request.action]()
+                    logging.info(Servers[int(request.id)].actions[request.action])
+                    Servers[int(request.id)].actions[request.action]()
                     s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.GOOD)))
                 else:
                     s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.UNCORECT_PASWORD)))
-            except:s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.BAD)))
+            # except:s.sendall(pickle.dumps(classes.ServerController.Response(classes.StatusCodes.BAD)))
         case classes.ServerCommand.Request:
-            try:
+            # try:
                 logging.log(logging.DEBUG, "ServerCommand request")
                 if auth(request.password):
-                    Servers[request.id].send(request.command)
+                    Servers[int(request.id)].send(request.command)
                     s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.GOOD)))
                 else: s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.UNCORECT_PASWORD)))
-            except:
-                    s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.BAD)))
+            # except:
+            #         s.sendall(pickle.dumps(classes.ServerCommand.Response(classes.StatusCodes.BAD)))
         case classes.GetLog.Request:
             try:
                 logging.log(logging.DEBUG, "GetLog request")
@@ -197,7 +200,7 @@ def ServerInit():
             else:
                 os.mkdir("Servers/" + str(i))
                 with open(f"Servers/{i}/start.sh", "w") as f:
-                    f.write(f"java -Xmx1024M -Xms1024M -jar Servers/{i}/server.jar nogui")
+                    f.write(f"java -Xmx1024M -Xms1024M -jar server.jar nogui")
     else:
         os.mkdir("Servers")
         ServerInit()
