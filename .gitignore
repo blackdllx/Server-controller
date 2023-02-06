@@ -1,0 +1,9 @@
+.pytest_cache
+kivy_venv
+libraries
+logs
+venv
+0.log
+1.log
+2.log
+test.py

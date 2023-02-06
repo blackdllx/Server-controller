@@ -3,6 +3,10 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/venv" />
+      <excludeFolder url="file://$MODULE_DIR$/.pytest_cache/v" />
+      <excludeFolder url="file://$MODULE_DIR$/kivy_venv/bin" />
+      <excludeFolder url="file://$MODULE_DIR$/kivy_venv/lib" />
+      <excludeFolder url="file://$MODULE_DIR$/kivy_venv/lib64" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
