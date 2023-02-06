@@ -1,44 +1,65 @@
+
+class StatusCodes:
+    GOOD=1
+    BAD=2
+    UNCORECT_PASWORD=3
 class HandShake:
-    def __init__(self, password):
-        self.format = b"b$"
-        self.values = [password]
-        self.response = True
+    class Request:
+        def __init__(self, password):
+            self.password = password
 
+    class Response:
+        def __init__(self, status):
+            self.status=status
 
-class StartServer:
-    def __init__(self, id, password):
-        self.format = b"ib$"
-        self.values = [id, password]
-        self.data = True
-        self.response = False
+class ServersInfo:
+    class Request:
+        def __init__(self, password):
+            self.password = password
+    class Response:
+        def __init__(self, status, info):
+            self.status=status
+            self.info =info
+
+class Stats:
+    class Request:
+        def __init__(self, password, id):
+            self.password= password
+            self.id = id
+
+    class Response:
+        def __init__(self, stats):
+            self.stats = stats
 
 class GetLog:
-    def __init__(self, id, log, password):
-        self.format = b"ib$b$"
-        self.values=[id, log, password]
-        self.response = True
-class StopServer:
-    def __init__(self, id, password):
-        self.format = b"ib$"
-        self.values = [id, password]
-        self.data = True
-        self.response = False
-class Command:
-    def __init__(self, command, id, password):
-        self.format = b"b$ib$"
-        self.values = [command, id, password]
-        self.data = True
-        self.response = False
+    class Request:
+        def __init__(self, password, id):
+            self.password = password
+            self.id=id
+    class Response:
+        def __init__(self, status, log):
+            self.status=status
+            self.log = log
 
-class GetServers:
-    def  __init__(self, servers, password):
-        self.format = b"ib$"
-        self.values = [servers, password]
+class ServerController:
+    class Request:
+        def __init__(self, password, id, action):
+            self.password = password
+            self.id=id
+            self.action=action
 
-class Test:
-    def __init__(self, time=0):
-        self.format = "f"
-        self.values = [time]
-        self.data = True
-        self.response = True
+    class Response:
+        def __init__(self, status):
+            self.status=status
 
+
+class ServerCommand:
+    class Request:
+        def __init__(self, password, id, command):
+            self.password = password
+            self.id=id
+            self.command=command
+
+    class Response:
+        def __init__(self, status):
+            self.status=status
