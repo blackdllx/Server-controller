@@ -1,0 +1,28 @@
+[00:32:40] [ServerMain/ERROR]: Failed to load properties from file: server.properties
+[00:32:40] [ServerMain/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[00:32:46] [ServerMain/WARN]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:32:46] [ServerMain/WARN]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:32:46] [ServerMain/WARN]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[00:32:46] [ServerMain/WARN]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[00:32:46] [ServerMain/WARN]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[00:32:48] [Worker-Main-12/INFO]: Loaded 7 recipes
+[00:32:49] [Worker-Main-12/INFO]: Loaded 1141 advancements
+[00:32:53] [Server thread/INFO]: Starting minecraft server version 1.18.2
+[00:32:53] [Server thread/INFO]: Loading properties
+[00:32:53] [Server thread/INFO]: Default game type: SURVIVAL
+[00:32:53] [Server thread/INFO]: Generating keypair
+[00:32:53] [Server thread/INFO]: Starting Minecraft server on *:25565
+[00:32:53] [Server thread/INFO]: Using epoll channel type
+[00:32:54] [Server thread/WARN]: **** FAILED TO BIND TO PORT!
+[00:32:54] [Server thread/WARN]: The exception was: io.netty.channel.unix.Errors$NativeIoException: bind(..) failed: Address already in use
+[00:32:54] [Server thread/WARN]: Perhaps a server is already running on that port?
+[00:32:54] [Server thread/INFO]: Stopping server
+[00:32:54] [Server thread/INFO]: Saving worlds
+[00:32:54] [Server thread/ERROR]: Exception stopping the server
+java.lang.NullPointerException: Cannot invoke "adw.p_()" because "$$5" is null
+	at net.minecraft.server.MinecraftServer.a(SourceFile:569) ~[server-1.18.2.jar:?]
+	at net.minecraft.server.MinecraftServer.t(SourceFile:626) ~[server-1.18.2.jar:?]
+	at acx.t(SourceFile:565) ~[server-1.18.2.jar:?]
+	at net.minecraft.server.MinecraftServer.w(SourceFile:729) ~[server-1.18.2.jar:?]
+	at net.minecraft.server.MinecraftServer.a(SourceFile:273) ~[server-1.18.2.jar:?]
+	at java.lang.Thread.run(Thread.java:1589) [?:?]
