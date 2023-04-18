@@ -1,0 +1,2 @@
+[console_scripts]
+mcli = mctools.__main__:main

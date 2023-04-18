@@ -1,5 +1,7 @@
+import mctools
 import requests
 import subprocess
+import random2
 import re
 import os
 import threading
@@ -17,11 +19,17 @@ class Server:
             "memory": "1024M"
         }
         self.log=b""
+        self.errors=[]
         self.active=False
-        
+        self.running=False
+        self.pipe=None
+        self.properties={}
+        self.password=''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
+
         self.CreateServer()
         self.DownloadServer(core, version)
         self.InnitServer()
+        self.PropertiesParce()
 
 
     def CreateServer(self) -> None:
@@ -66,21 +74,82 @@ class Server:
                                         cwd=f"./Servers1/{self.id}/", stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         self.active = True
         print("Start logging")
-        threading.Thread(target=self.Logging).run()
+        threading.Thread(target=self.EventsHandler).start()
+        threading.Thread(target=self.Logging).start()
+        
         
     def Logging(self):
         print("Logging started")
         while self.active:
-            temp = self.process.stdout.read()
-            self.log = self.log + temp
+            temp = self.process.stdout.readline()
+            if temp != b"":
+                self.log = self.log + temp
+                print(temp.decode(), end="")
             time.sleep(0.2)
-            print(self.log)
+
+    def EventsHandler(self):
+        print("Handle events")
+        def ErrorHandler(self):
+            for i in self.log.decode().split("\n"):
+                if re.search(r'.*\/ERROR\]', i):
+                    if not i in self.errors:
+                        print("Error found")
+                        self.errors.append(i)
+                        print(self.errors)
+
+        while self.active:
+            time.sleep(0.2)
+            if re.search(r"\[Server thread\/INFO\]: Done", self.log.decode()) and not self.running:
+                print('Done found')
+                self.running = True
+
+            ErrorHandler(self)
+    
+    def PropertiesParce(self):
+        with open(f"Servers1/{self.id}/server.properties", "rb") as f:
+            for i in f.read().decode().split("\n"):
+                if i[0] != "#":
+                    self.properties.update({i.split("=")[0]:i.split("=")[1]})
+
+    def PropertiesSave(self):
+        with open(f"Servers1/{self.id}/server.properties", "wb") as f:
+            for i in self.properties:
+                f.write(f"{i}={self.properties[i]}")
+
+    def CreatePipe(self):
+        flag=False
+        if self.properties["enable-rcon"] == "false":
+            self.properties["enable-rcon"]="true"
+            flag=True
+
+        if self.properties["rcon.password"] == "":
+            self.properties["rcon.password"] = self.password
+        else:
+            self.password=self.properties["rcon.password"]
+        
+        if flag:
+            self.process.stdin.write(b"stop") # Add stop event to event Handler
+            self.process.stdin.flush()
+            self.active=False
+            self.running=False
+            self.PropertiesSave()
+            self.InnitServer()
+            while not self.running:
+                time.sleep(0.1)
             
-                    
+
+        self.pipe = mctools.RCONClient(f"localhost", self.properties["server-port"])
+        self.pipe.login(self.password)
+        
+        if not self.pipe.is_authenticated():
+            raise LookupError
+
+
+            
 
 
 class Cord:
     def __init__(self) -> None:
         pass
 
-Server("Standart name", version="1.18.2", _id=0)
+s=Server("Standart name", version="1.18.2", _id=0)
