@@ -1,5 +1,5 @@
-[11:58:44] [ServerMain/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
-[11:58:44] [ServerMain/ERROR]: Failed to start the minecraft server
+[18:56:18] [ServerMain/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', servicesHost='https://api.minecraftservices.com', name='PROD'
+[18:56:18] [ServerMain/ERROR]: Failed to start the minecraft server
 ait$a: /home/dllx/projects/Server-controller/Servers1/0/./world/session.lock: already locked (possibly by other Minecraft instance?)
 	at ait$a.a(SourceFile:98) ~[server-1.18.2.jar:?]
 	at ait.a(SourceFile:44) ~[server-1.18.2.jar:?]
