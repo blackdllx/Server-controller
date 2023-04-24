@@ -13,7 +13,7 @@ from utils import *
 
 
 class Server:
-    def __init__(self, name: str, _id=None, core: str = "vanilla", version: str = "1.19.2", pirate: bool = False) -> None:
+    def __init__(self, name: str, _id=None, core: str = "vanilla", version: str = "1.19.2", pirate: bool = False, update=False) -> None:
         self.name = name
         self.id = _id
         self.config = { # TODO: Config saver to json
@@ -28,7 +28,7 @@ class Server:
         self.password=''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
 
         self.CreateServer()
-        self.DownloadServer(core, version)
+        self.DownloadServer(core, version, update)
         self.InnitServer()
         
         self.WhenRunning(self.CreatePipe)
@@ -52,11 +52,10 @@ class Server:
         if not os.path.isdir(f"Servers1/{self.id}"):
             os.makedirs(f"Servers1/{self.id}")
     
-    def DownloadServer(self, core, version) -> None:
-        # TODO: Core change
+    def DownloadServer(self, core, version, update) -> None:
 
         
-        if os.path.isfile(f"Servers1/{self.id}/Server.jar"):return
+        if os.path.isfile(f"Servers1/{self.id}/Server.jar") and not update:return
         match core:
             case "vanilla":
                 temp = requests.get(f"https://mcversions.net/download/{version}").content.decode()
